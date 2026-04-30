@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<title>Key Signatures</title>
+
+<!-- iOS / Add-to-Home-Screen support -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Key Signatures" />
+<meta name="theme-color" content="#f5f3ee" />
+<meta name="format-detection" content="telephone=no" />
+
+<!-- Inline SVG home-screen icon (no separate file needed) -->
+<link rel="apple-touch-icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="40" fill="%23f5f3ee"/><text x="50%25" y="58%25" text-anchor="middle" font-family="Iowan Old Style, Palatino, Georgia, serif" font-size="120" font-weight="400" fill="%230c0a08" letter-spacing="-3">C%23</text></svg>' />
+<style>
+  :root {
+    --bg: #f5f3ee;
+    --bg-soft: #ecebe5;
+    --card: #ffffff;
+    --ink: #0c0a08;
+    --ink-soft: #6a655c;
+    --ink-faint: #a8a499;
+    --rule: #e7e4dc;
+    --rule-soft: #efece4;
+    --accent: #0c0a08;
+    --good: #4f6b4a;
+    --bad: #9d4636;
+    --warn: #8c6e23;
+    --shadow-sm: 0 1px 2px rgba(20,15,10,.04);
+    --shadow-md: 0 1px 2px rgba(20,15,10,.04), 0 12px 32px rgba(20,15,10,.06);
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior: contain;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  .app {
+    max-width: 520px;
+    margin: 0 auto;
+    padding:
+      calc(22px + env(safe-area-inset-top))
+      calc(18px + env(safe-area-inset-right))
+      calc(40px + env(safe-area-inset-bottom))
+      calc(18px + env(safe-area-inset-left));
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  header h1 {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    margin: 0;
+  }
+  header .menu {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 999px;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  header .menu:hover { background: var(--bg-soft); color: var(--ink); }
+
+  /* Stats — minimal inline pill */
+  .stats {
+    display: flex;
+    gap: 0;
+    margin-bottom: 14px;
+    font-size: 12px;
+    background: var(--bg-soft);
+    border-radius: 999px;
+    padding: 4px;
+    width: 100%;
+    overflow: hidden;
+  }
+  .stat {
+    flex: 1;
+    text-align: center;
+    padding: 6px 4px;
+    border-radius: 999px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+    transition: background 120ms ease;
+  }
+  .stat .n { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .stat .l { color: var(--ink-faint); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; margin-left: 5px; }
+
+  /* Inline controls */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+  .control-group { display: flex; align-items: center; gap: 8px; }
+  .control-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .seg {
+    display: inline-flex;
+    background: var(--bg-soft);
+    border-radius: 7px;
+    padding: 2px;
+    gap: 2px;
+  }
+  .seg button {
+    background: none;
+    border: none;
+    padding: 5px 10px;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 140ms ease;
+    font-weight: 500;
+    letter-spacing: 0.005em;
+  }
+  .seg button:hover { color: var(--ink); }
+  .seg button.on {
+    background: var(--card);
+    color: var(--ink);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* The flashcard itself */
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    box-shadow: var(--shadow-md);
+    padding: 36px 24px 28px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 380px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 120ms ease, box-shadow 200ms ease;
+    animation: cardIn 280ms cubic-bezier(.2,.8,.2,1);
+  }
+  .card:active { transform: scale(0.997); }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .face { text-align: center; width: 100%; }
+
+  .label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 22px;
+  }
+
+  .keyname {
+    font-family: var(--serif);
+    font-size: 84px;
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    margin: 4px 0 0;
+    color: var(--ink);
+  }
+  .keyname.small { font-size: 44px; }
+  .keytag {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 10px;
+  }
+  .key-enharm {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    color: var(--ink-faint);
+    margin-top: 4px;
+  }
+  .key-enharm::before { content: "/ "; opacity: 0.6; }
+  .minor {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    letter-spacing: 0.005em;
+  }
+
+  .staff-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 18px auto;
+    max-width: 320px;
+  }
+  .staff-svg { width: 100%; height: auto; }
+
+  .accs {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 500;
+    margin: 14px 0 6px;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+  }
+  .accs.empty {
+    color: var(--ink-faint);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 16px;
+  }
+
+  .meta {
+    color: var(--ink-soft);
+    font-size: 13px;
+    margin-top: 12px;
+    letter-spacing: 0.005em;
+  }
+  .meta strong { color: var(--ink); font-weight: 600; }
+
+  .hint {
+    color: var(--ink-faint);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    margin-top: 26px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* Response buttons */
+  .responses {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .responses button {
+    padding: 13px 4px 11px;
+    border: none;
+    background: var(--card);
+    border-radius: 10px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 140ms ease;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+    box-shadow: var(--shadow-sm);
+    letter-spacing: 0.005em;
+    position: relative;
+  }
+  .responses button::before {
+    content: "";
+    position: absolute;
+    inset: auto 12px 6px 12px;
+    height: 2px;
+    border-radius: 1px;
+    transition: opacity 140ms ease;
+    opacity: 0.7;
+  }
+  .responses button:hover { transform: translateY(-1px); }
+  .responses button:hover::before { opacity: 1; }
+  .responses button:active { transform: translateY(0); }
+  .responses button .interval {
+    font-size: 10px;
+    color: var(--ink-faint);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .responses .again::before { background: var(--bad); }
+  .responses .hard::before  { background: var(--warn); }
+  .responses .good::before  { background: var(--ink); }
+  .responses .easy::before  { background: var(--good); }
+
+  .reveal-btn {
+    margin-top: 14px;
+    padding: 15px;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 10px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    width: 100%;
+    transition: opacity 120ms ease, transform 120ms ease;
+  }
+  .reveal-btn:hover { opacity: 0.9; }
+  .reveal-btn:active { transform: scale(0.99); }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-soft);
+  }
+  .empty-state h2 {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
+  .empty-state p { font-size: 14px; margin: 0 0 20px; line-height: 1.5; }
+  .empty-state button {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+  }
+
+  /* Settings sheet */
+  .panel {
+    position: fixed;
+    inset: 0;
+    background: rgba(12,10,8,0.32);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 10;
+    animation: fade 180ms ease;
+  }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  .panel-inner {
+    background: var(--bg);
+    width: 100%;
+    max-width: 520px;
+    border-radius: 18px 18px 0 0;
+    padding: 26px 22px 34px;
+    max-height: 82vh;
+    overflow-y: auto;
+    animation: slideUp 220ms cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes slideUp { from { transform: translateY(20px); } to { transform: translateY(0); } }
+  @media (min-width: 540px) {
+    .panel { align-items: center; }
+    .panel-inner { border-radius: 18px; }
+    @keyframes slideUp { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  }
+  .panel-inner h2 {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+  }
+  .panel-inner h3 {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 22px 0 10px;
+  }
+  .panel-inner p { font-size: 13px; color: var(--ink-soft); line-height: 1.55; margin: 0 0 6px; }
+  .panel-inner .row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .panel-inner .row:last-child { border-bottom: none; }
+  .panel-inner button.action {
+    background: transparent;
+    border: 1px solid var(--rule);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 140ms ease;
+  }
+  .panel-inner button.action:hover { background: var(--card); }
+  .panel-inner button.action.danger { color: var(--bad); border-color: var(--rule); }
+  .panel-inner button.action.danger:hover { background: rgba(157,70,54,0.06); }
+
+  .panel-close {
+    background: var(--bg-soft); border: none;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    font-size: 18px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    float: right;
+    padding: 0;
+    line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 120ms ease;
+  }
+  .panel-close:hover { background: var(--rule); }
+
+  /* Deck list rows */
+  .deck-list { font-size: 13px; }
+  .deck-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .deck-row:last-child { border-bottom: none; }
+  .deck-row .key { font-weight: 500; font-family: var(--serif); font-size: 15px; }
+  .deck-row .key .km { color: var(--ink-faint); font-style: italic; font-size: 13px; margin-left: 4px; }
+  .deck-row .state { font-size: 11px; color: var(--ink-faint); letter-spacing: 0.04em; text-transform: uppercase; font-family: var(--sans); }
+  .deck-row .state.review { color: var(--good); }
+  .deck-row .state.learning { color: var(--warn); }
+  .deck-row .state.new { color: var(--ink-soft); }
+
+  @media (max-width: 380px) {
+    .app { padding: 18px 14px 36px; }
+    .keyname { font-size: 60px; }
+    .card { padding: 30px 20px 24px; min-height: 340px; }
+    .responses button { font-size: 12px; padding: 11px 2px 9px; }
+    .responses button .interval { font-size: 9px; }
+    .controls { gap: 8px; }
+    .control-label { display: none; }
+    .seg button { padding: 5px 9px; font-size: 11.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <h1>Key Signatures</h1>
+    <button class="menu" id="menuBtn">Settings</button>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><span class="n" id="cNew">0</span><span class="l">new</span></div>
+    <div class="stat"><span class="n" id="cLearn">0</span><span class="l">learning</span></div>
+    <div class="stat"><span class="n" id="cReview">0</span><span class="l">review</span></div>
+  </div>
+
+  <div class="controls">
+    <div class="control-group">
+      <span class="control-label">Show</span>
+      <span class="seg" id="dirSeg">
+        <button data-dir="signature">Signature</button>
+        <button data-dir="name">Name</button>
+        <button data-dir="random">Mix</button>
+      </span>
+    </div>
+    <div class="control-group" style="margin-left:auto;">
+      <span class="control-label">Order</span>
+      <span class="seg" id="orderSeg">
+        <button data-order="srs">Smart</button>
+        <button data-order="shuffle">Shuffle</button>
+      </span>
+    </div>
+  </div>
+
+  <div id="cardArea"></div>
+
+</div>
+
+<div id="panel"></div>
+
+<script>
+/* ============================================================
+   DATA — 13 major keys + relative minors
+   ============================================================ */
+
+const KEYS = [
+  { major:'C',  minor:'A',  accs:[],                                type:'natural', enharm:null, mnemonic:'No sharps or flats — the white keys.' },
+  { major:'G',  minor:'E',  accs:['F#'],                            type:'sharp',   enharm:null, mnemonic:'One sharp: F♯.' },
+  { major:'D',  minor:'B',  accs:['F#','C#'],                       type:'sharp',   enharm:null, mnemonic:'Two sharps: F♯, C♯.' },
+  { major:'A',  minor:'F#', accs:['F#','C#','G#'],                  type:'sharp',   enharm:null, mnemonic:'Three sharps: F♯, C♯, G♯.' },
+  { major:'E',  minor:'C#', accs:['F#','C#','G#','D#'],             type:'sharp',   enharm:null, mnemonic:'Four sharps: F♯, C♯, G♯, D♯.' },
+  { major:'B',  minor:'G#', accs:['F#','C#','G#','D#','A#'],        type:'sharp',   enharm:'Cb',  mnemonic:'Five sharps. Enharmonic with C♭ major.' },
+  { major:'F#', minor:'D#', accs:['F#','C#','G#','D#','A#','E#'],   type:'sharp',   enharm:'Gb',  mnemonic:'Six sharps. Sounds the same as G♭ major.' },
+  { major:'Gb', minor:'Eb', accs:['Bb','Eb','Ab','Db','Gb','Cb'],   type:'flat',    enharm:'F#',  mnemonic:'Six flats. Sounds the same as F♯ major.' },
+  { major:'Db', minor:'Bb', accs:['Bb','Eb','Ab','Db','Gb'],        type:'flat',    enharm:null, mnemonic:'Five flats: B♭, E♭, A♭, D♭, G♭.' },
+  { major:'Ab', minor:'F',  accs:['Bb','Eb','Ab','Db'],             type:'flat',    enharm:null, mnemonic:'Four flats: B♭, E♭, A♭, D♭.' },
+  { major:'Eb', minor:'C',  accs:['Bb','Eb','Ab'],                  type:'flat',    enharm:null, mnemonic:'Three flats: B♭, E♭, A♭.' },
+  { major:'Bb', minor:'G',  accs:['Bb','Eb'],                       type:'flat',    enharm:null, mnemonic:'Two flats: B♭, E♭.' },
+  { major:'F',  minor:'D',  accs:['Bb'],                            type:'flat',    enharm:null, mnemonic:'One flat: B♭.' },
+];
+
+/* Pedagogical introduction order — alternating sharps/flats from C */
+const INTRO_ORDER = ['C','G','F','D','Bb','A','Eb','E','Ab','B','Db','F#','Gb'];
+
+/* Staff position for each accidental (treble clef)
+   0 = top line, +1 = top space ... larger y => lower on staff */
+const TREBLE_SHARP_POS = { 'F#':0, 'C#':3, 'G#':-1, 'D#':2, 'A#':5, 'E#':1, 'B#':4 };
+const TREBLE_FLAT_POS  = { 'Bb':4, 'Eb':1, 'Ab':5, 'Db':2, 'Gb':6, 'Cb':3, 'Fb':7 };
+
+/* ============================================================
+   STATE — simple SM-2 inspired SRS
+   ============================================================ */
+
+const NEW_PER_SESSION = 2;          // introduce 2 new cards per session start
+const LEARNING_STEPS = [1, 3];      // positions until graduate (relative card count)
+const GRADUATE_INTERVAL = 4;        // first interval after graduating
+const MIN_EASE = 1.3;
+
+let STATE = {
+  cards: {},               // major -> { state, ease, interval, due, reps, lapses }
+  position: 0,             // global tick — increments per review
+  introIdx: 0,             // next new card to introduce
+  direction: 'signature',  // 'signature' | 'name' | 'random'
+  order: 'srs',            // 'srs' | 'shuffle'
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('ks_flash_v1');
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s && s.cards) STATE = s;
+    }
+  } catch (e) { /* ignore */ }
+  // ensure preference fields exist (for older saved state)
+  if (!STATE.direction) STATE.direction = 'signature';
+  if (!STATE.order) STATE.order = 'srs';
+  // ensure all keys exist
+  KEYS.forEach(k => {
+    if (!STATE.cards[k.major]) {
+      STATE.cards[k.major] = {
+        state: 'new',
+        ease: 2.5,
+        interval: 0,
+        due: 0,
+        reps: 0,
+        lapses: 0,
+        learnStep: 0,
+      };
+    }
+  });
+}
+function saveState() {
+  try { localStorage.setItem('ks_flash_v1', JSON.stringify(STATE)); } catch (e) {}
+}
+
+/* ============================================================
+   SCHEDULING
+   ============================================================ */
+
+/* Pick the next card to show.
+   Priority:
+     1. Any 'learning' card whose due <= position
+     2. Any 'review' card whose due <= position
+     3. A new card (if any remain in intro order)
+     4. The earliest-due card overall (overflow review)
+*/
+function pickNextCard() {
+  // Shuffle mode: pick a random card from the full deck, avoiding the
+  // most recently shown one if possible.
+  if (STATE.order === 'shuffle') {
+    const pool = KEYS.map(k => k.major).filter(m => m !== currentMajor);
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  const cards = Object.entries(STATE.cards);
+  const dueLearning = cards
+    .filter(([m,c]) => c.state === 'learning' && c.due <= STATE.position)
+    .sort((a,b) => a[1].due - b[1].due);
+  if (dueLearning.length) return dueLearning[0][0];
+
+  const dueReview = cards
+    .filter(([m,c]) => c.state === 'review' && c.due <= STATE.position)
+    .sort((a,b) => a[1].due - b[1].due);
+  if (dueReview.length) return dueReview[0][0];
+
+  // introduce a new card
+  while (STATE.introIdx < INTRO_ORDER.length) {
+    const next = INTRO_ORDER[STATE.introIdx];
+    if (STATE.cards[next] && STATE.cards[next].state === 'new') return next;
+    STATE.introIdx++;
+  }
+
+  // fall back to earliest-due
+  const future = cards.filter(([m,c]) => c.state !== 'new').sort((a,b) => a[1].due - b[1].due);
+  return future.length ? future[0][0] : null;
+}
+
+/* Resolve which side of the card to show first for this draw. */
+function resolveDirection() {
+  if (STATE.direction === 'random') {
+    return Math.random() < 0.5 ? 'signature' : 'name';
+  }
+  return STATE.direction;
+}
+
+/* Apply user response and reschedule.
+   answer: 'again' | 'hard' | 'good' | 'easy'                              */
+function answerCard(major, answer) {
+  const c = STATE.cards[major];
+  if (!c) return;
+
+  STATE.position++;
+
+  // moving from new -> learning
+  if (c.state === 'new') {
+    c.state = 'learning';
+    c.learnStep = 0;
+  }
+
+  if (answer === 'again') {
+    c.state = 'learning';
+    c.learnStep = 0;
+    c.interval = 1;
+    c.due = STATE.position + 1;
+    c.lapses += 1;
+    c.ease = Math.max(MIN_EASE, c.ease - 0.2);
+  } else if (c.state === 'learning') {
+    if (answer === 'easy') {
+      c.state = 'review';
+      c.interval = GRADUATE_INTERVAL + 2;
+      c.due = STATE.position + c.interval;
+      c.reps = 1;
+    } else if (answer === 'good') {
+      c.learnStep += 1;
+      if (c.learnStep >= LEARNING_STEPS.length) {
+        c.state = 'review';
+        c.interval = GRADUATE_INTERVAL;
+        c.due = STATE.position + c.interval;
+        c.reps = 1;
+      } else {
+        c.interval = LEARNING_STEPS[c.learnStep];
+        c.due = STATE.position + c.interval;
+      }
+    } else if (answer === 'hard') {
+      // stay on current learning step
+      c.interval = Math.max(1, LEARNING_STEPS[c.learnStep] || 1);
+      c.due = STATE.position + c.interval;
+    }
+  } else if (c.state === 'review') {
+    if (answer === 'hard') {
+      c.ease = Math.max(MIN_EASE, c.ease - 0.15);
+      c.interval = Math.max(1, Math.round(c.interval * 1.2));
+    } else if (answer === 'good') {
+      c.interval = Math.max(1, Math.round(c.interval * c.ease));
+    } else if (answer === 'easy') {
+      c.ease += 0.15;
+      c.interval = Math.max(1, Math.round(c.interval * c.ease * 1.3));
+    }
+    c.due = STATE.position + c.interval;
+    c.reps += 1;
+  }
+
+  saveState();
+  render();
+}
+
+/* Project the next interval (in cards-from-now) for each answer.
+   Used for the small text under each response button.                       */
+function projectInterval(major, answer) {
+  const c = STATE.cards[major];
+  if (!c) return '';
+  if (answer === 'again') return '<1m';
+  if (c.state === 'new' || c.state === 'learning') {
+    if (answer === 'hard') return 'soon';
+    if (answer === 'good') {
+      const nextStep = c.learnStep + 1;
+      if (nextStep >= LEARNING_STEPS.length) return GRADUATE_INTERVAL + ' cards';
+      return LEARNING_STEPS[nextStep] + ' cards';
+    }
+    if (answer === 'easy') return (GRADUATE_INTERVAL + 2) + ' cards';
+  } else {
+    if (answer === 'hard') return Math.round(c.interval * 1.2) + ' cards';
+    if (answer === 'good') return Math.round(c.interval * c.ease) + ' cards';
+    if (answer === 'easy') return Math.round(c.interval * (c.ease + 0.15) * 1.3) + ' cards';
+  }
+  return '';
+}
+
+/* ============================================================
+   STAFF NOTATION (treble clef)
+   ============================================================ */
+
+function renderStaff(key) {
+  const width = 240, height = 90;
+  const lineSp = 9, halfSp = lineSp / 2, staffTop = 22;
+  const staffLeft = 12, staffRight = width - 10;
+  const yOf = p => staffTop + p * halfSp;
+
+  let svg = `<svg class="staff-svg" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
+  // staff lines
+  for (let i = 0; i < 5; i++) {
+    const y = staffTop + i * lineSp;
+    svg += `<line x1="${staffLeft}" y1="${y}" x2="${staffRight}" y2="${y}" stroke="#222" stroke-width="0.8"/>`;
+  }
+  // left bar
+  svg += `<line x1="${staffLeft}" y1="${staffTop}" x2="${staffLeft}" y2="${staffTop + 4*lineSp}" stroke="#222" stroke-width="1.1"/>`;
+  // treble clef glyph
+  const fontStack = "'Bravura','Noto Music','Apple Symbols','Petrucci','Sebastian',serif";
+  const fontSize = lineSp * 8.2;
+  const yPos = staffTop + 4 * lineSp + lineSp * 0.95;
+  svg += `<text x="${staffLeft + 6}" y="${yPos}" font-size="${fontSize}" font-family="${fontStack}" fill="#222">&#119070;</text>`;
+
+  // accidentals
+  const positions = key.type === 'flat' ? TREBLE_FLAT_POS : TREBLE_SHARP_POS;
+  const xStart = staffLeft + 38;
+  const xStep = 10;
+  key.accs.forEach((a, i) => {
+    const x = xStart + i * xStep;
+    const y = yOf(positions[a]);
+    svg += renderAccidental(key.type, x, y);
+  });
+  svg += `</svg>`;
+  return svg;
+}
+
+function renderAccidental(type, x, y) {
+  if (type === 'sharp') {
+    // Sharp — crossbars centred vertically on (x,y)
+    return `<g transform="translate(${x},${y})">
+      <line x1="-2.2" y1="-8" x2="-2.2" y2="7.5" stroke="#0a0a0a" stroke-width="0.9"/>
+      <line x1="2.2"  y1="-7.5" x2="2.2"  y2="8" stroke="#0a0a0a" stroke-width="0.9"/>
+      <line x1="-4.6" y1="-2.6" x2="4.6" y2="-4.0" stroke="#0a0a0a" stroke-width="2.6" stroke-linecap="square"/>
+      <line x1="-4.6" y1="3.0"  x2="4.6" y2="1.6"  stroke="#0a0a0a" stroke-width="2.6" stroke-linecap="square"/>
+    </g>`;
+  } else {
+    // Flat — the *bowl* is the anchor and must sit centred on (x,y).
+    // Stem extends upwards; bowl spans roughly y = -3 to y = +3.
+    return `<g transform="translate(${x},${y})">
+      <rect x="-2.6" y="-12.5" width="1.5" height="15.5" fill="#0a0a0a"/>
+      <path d="M -1.1 -3 C 3.0 -3.4 5.0 -1.6 5.0 0.6
+               C 5.0 2.8 2.0 3.6 -1.1 2.6 Z" fill="#0a0a0a"/>
+    </g>`;
+  }
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+
+let currentMajor = null;
+let currentDirection = null;   // 'signature' | 'name' — fixed once per card draw
+let revealed = false;
+
+function render() {
+  // stats
+  const counts = { new:0, learning:0, review:0 };
+  Object.values(STATE.cards).forEach(c => counts[c.state]++);
+  document.getElementById('cNew').textContent = counts.new;
+  document.getElementById('cLearn').textContent = counts.learning;
+  document.getElementById('cReview').textContent = counts.review;
+
+  // Reflect current control settings on the segmented buttons
+  document.querySelectorAll('#dirSeg button').forEach(b => {
+    b.classList.toggle('on', b.dataset.dir === STATE.direction);
+  });
+  document.querySelectorAll('#orderSeg button').forEach(b => {
+    b.classList.toggle('on', b.dataset.order === STATE.order);
+  });
+
+  const area = document.getElementById('cardArea');
+
+  // pick a card
+  if (!currentMajor) {
+    currentMajor = pickNextCard();
+    currentDirection = resolveDirection();
+    revealed = false;
+  }
+
+  if (!currentMajor) {
+    area.innerHTML = `
+      <div class="card"><div class="empty-state">
+        <h2>Nothing due</h2>
+        <p>You're caught up. Come back later, switch on Shuffle to keep practising, or review everything once more.</p>
+        <button id="reviewAll">Review all keys</button>
+      </div></div>
+    `;
+    document.getElementById('reviewAll').addEventListener('click', () => {
+      Object.values(STATE.cards).forEach(c => { if (c.state === 'review') c.due = STATE.position; });
+      saveState();
+      render();
+    });
+    return;
+  }
+
+  const k = KEYS.find(x => x.major === currentMajor);
+  const c = STATE.cards[currentMajor];
+  const stateLabel = c.state === 'new' ? 'New card'
+    : c.state === 'learning' ? 'Learning'
+    : `Review · ${c.reps} rep${c.reps!==1?'s':''}`;
+
+  if (!revealed) {
+    area.innerHTML = `
+      <div class="card" id="cardEl">
+        <div class="face">
+          <div class="label">${stateLabel}</div>
+          ${renderFront(k, currentDirection)}
+          <div class="hint">Tap to reveal</div>
+        </div>
+      </div>
+      <button class="reveal-btn" id="revealBtn">Reveal answer</button>
+    `;
+    document.getElementById('cardEl').addEventListener('click', reveal);
+    document.getElementById('revealBtn').addEventListener('click', reveal);
+  } else {
+    area.innerHTML = `
+      <div class="card">
+        <div class="face">
+          <div class="label">${stateLabel}</div>
+          ${renderBack(k, currentDirection)}
+        </div>
+      </div>
+      <div class="responses">
+        <button class="again" data-ans="again">
+          <span>Again</span>
+          <span class="interval">${projectInterval(currentMajor,'again')}</span>
+        </button>
+        <button class="hard" data-ans="hard">
+          <span>Hard</span>
+          <span class="interval">${projectInterval(currentMajor,'hard')}</span>
+        </button>
+        <button class="good" data-ans="good">
+          <span>Good</span>
+          <span class="interval">${projectInterval(currentMajor,'good')}</span>
+        </button>
+        <button class="easy" data-ans="easy">
+          <span>Easy</span>
+          <span class="interval">${projectInterval(currentMajor,'easy')}</span>
+        </button>
+      </div>
+    `;
+    document.querySelectorAll('.responses button').forEach(b => {
+      b.addEventListener('click', () => {
+        answerCard(currentMajor, b.dataset.ans);
+        currentMajor = null;
+        revealed = false;
+        render();
+      });
+    });
+  }
+}
+
+/* Front of card — depends on direction. */
+function renderFront(k, dir) {
+  if (dir === 'signature') {
+    return `
+      <div class="keytag" style="margin-top:0; margin-bottom:18px;">name this key</div>
+      <div class="staff-wrap" style="max-width:320px; margin:6px auto 26px;">${renderStaff(k)}</div>
+    `;
+  }
+  // name first
+  return `
+    <div class="keyname">${formatKey(k.major)}</div>
+    <div class="keytag">major</div>
+  `;
+}
+
+/* Back of card — always shows the full information, but emphasises whichever
+   side was being recalled. */
+function renderBack(k, dir) {
+  const accText = k.accs.length === 0
+    ? '<div class="accs empty">no sharps or flats</div>'
+    : `<div class="accs">${k.accs.map(formatAcc).join('  ·  ')}</div>`;
+  const enharmLine = k.enharm
+    ? `<div class="meta">Enharmonic with <strong>${formatKey(k.enharm)} major</strong></div>`
+    : '';
+
+  if (dir === 'signature') {
+    // they were recalling the name from the staff — emphasise the name
+    return `
+      <div class="keyname">${formatKey(k.major)}</div>
+      <div class="keytag">major</div>
+      <div class="minor" style="margin-top:14px;">relative minor: ${formatKey(k.minor)} minor</div>
+      <div class="staff-wrap" style="max-width:280px;">${renderStaff(k)}</div>
+      ${accText}
+      ${enharmLine}
+    `;
+  }
+  // name-first: they were recalling the signature — emphasise the staff
+  return `
+    <div class="staff-wrap" style="max-width:320px; margin:4px auto 18px;">${renderStaff(k)}</div>
+    <div class="keyname small">${formatKey(k.major)}</div>
+    <div class="keytag">major</div>
+    <div class="minor" style="margin-top:10px;">relative minor: ${formatKey(k.minor)} minor</div>
+    ${accText}
+    ${enharmLine}
+  `;
+}
+
+function reveal() {
+  revealed = true;
+  render();
+}
+
+/* Wire up the inline control buttons */
+document.querySelectorAll('#dirSeg button').forEach(b => {
+  b.addEventListener('click', () => {
+    STATE.direction = b.dataset.dir;
+    saveState();
+    // keep the current card but re-resolve its direction so the change is felt immediately
+    currentDirection = resolveDirection();
+    revealed = false;
+    render();
+  });
+});
+document.querySelectorAll('#orderSeg button').forEach(b => {
+  b.addEventListener('click', () => {
+    STATE.order = b.dataset.order;
+    saveState();
+    // when switching mode, pick a fresh card so the new order takes effect
+    currentMajor = null;
+    revealed = false;
+    render();
+  });
+});
+
+/* Format a key letter with proper sharp/flat unicode glyph */
+function formatKey(s) {
+  return s.replace(/#/g, '♯').replace(/b(?!$)/, '♭').replace(/b$/, '♭');
+}
+function formatAcc(s) {
+  return s.replace(/#/g, '♯').replace(/b/, '♭');
+}
+
+/* ============================================================
+   SETTINGS PANEL
+   ============================================================ */
+
+document.getElementById('menuBtn').addEventListener('click', openPanel);
+
+function openPanel() {
+  const rows = KEYS.map(k => {
+    const c = STATE.cards[k.major];
+    let stateLabel = c.state;
+    let info = '';
+    if (c.state === 'review') info = `int. ${c.interval} · ease ${c.ease.toFixed(2)}`;
+    else if (c.state === 'learning') info = `step ${c.learnStep + 1}/${LEARNING_STEPS.length}`;
+    return `<div class="deck-row">
+      <span class="key">${formatKey(k.major)} <span class="km">${formatKey(k.minor)}m</span></span>
+      <span class="state ${c.state}">${stateLabel}${info ? ' · ' + info : ''}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('panel').innerHTML = `
+    <div class="panel">
+      <div class="panel-inner">
+        <button class="panel-close" id="closePanel">×</button>
+        <h2>Settings</h2>
+
+        <h3>How it works</h3>
+        <p>
+          Cards are introduced in the standard order around the circle of fifths
+          (C, G, F, D, B♭&hellip;). After revealing the answer, rate how easily you recalled it.
+          <strong>Again</strong> resets the card, <strong>Hard</strong> shortens the next interval,
+          <strong>Good</strong> doubles it, <strong>Easy</strong> stretches it further.
+          Cards you struggle with come back sooner; cards you know recede.
+        </p>
+
+        <h3>Deck progress</h3>
+        <div class="deck-list">${rows}</div>
+
+        <h3>Reset</h3>
+        <div class="row">
+          <span style="font-size:13px; color:var(--ink-soft);">Forget all progress</span>
+          <button class="action danger" id="resetAll">Reset</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('closePanel').addEventListener('click', closePanel);
+  document.querySelector('.panel').addEventListener('click', e => {
+    if (e.target.classList.contains('panel')) closePanel();
+  });
+  document.getElementById('resetAll').addEventListener('click', () => {
+    if (confirm('Reset all progress?')) {
+      localStorage.removeItem('ks_flash_v1');
+      STATE = { cards:{}, position:0, introIdx:0 };
+      loadState();
+      currentMajor = null;
+      revealed = false;
+      closePanel();
+      render();
+    }
+  });
+}
+function closePanel() { document.getElementById('panel').innerHTML = ''; }
+
+/* ============================================================
+   INIT
+   ============================================================ */
+
+loadState();
+render();
+</script>
+</body>
+</html>
